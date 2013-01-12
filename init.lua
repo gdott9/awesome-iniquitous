@@ -1,6 +1,8 @@
 -- {{{ Configure widgets
-require("iniquitous.mpc")
-require("iniquitous.volume")
+local iniquitous = {}
+
+iniquitous.mpc = require("iniquitous.mpc")
+iniquitous.volume = require("iniquitous.volume")
 -- }}}
 
-module("iniquitous")
+return iniquitous
