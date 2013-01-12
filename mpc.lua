@@ -1,6 +1,7 @@
-local awful = awful
-local naughty = { notify = naughty.notify }
-local widget = widget
+local awful = require("awful")
+local naughty = require("naughty")
+local wibox = require("wibox")
+
 local timer = timer
 local string = string
 local os    = {
@@ -14,10 +15,9 @@ local io = {
 local table = {
     insert  = table.insert
 }
-local print = print
 local tonumber = tonumber
 
-module("iniquitous.mpc")
+local mpc = {}
 
 function music_current_short()
     local music = awful.util.pread('mpc -f "[%artist%]##[%track%]##[%title%]##[%time%]##" | head -2 | sed "s/^\\[\\(playing\\|paused\\)\\] \\+#[0-9]\\+\\/[0-9]\\+ \\+\\([0-9]\\+:[0-9]\\+\\)\\/.*$/\\1#\\2#/" | tr -d "\\n"')
@@ -63,7 +63,7 @@ function music_cover()
     local dir = "/home/gdott9/Music/" .. awful.util.pread("dirname \"`mpc -f '%file%' | head -1`\"")
 
     if(string.len(music) > 0) then
-        music = string.gsub(string.sub(music, 1, string.len(music)-1), "[/\?%*:|\"<>]", "_")
+        music = string.gsub(string.sub(music, 1, string.len(music)-1), "[/?%*:|\"<>]", "_")
         --local file = os.getenv("HOME") .. "/.album/".. music ..".jpg"
         local file = string.sub(dir, 1, string.len(dir)-1) .. "/cover.jpg"
         local test = io.open(file)
@@ -99,25 +99,6 @@ function notify()
     })
 end
 
-function init()
-    tb = widget({ type = "textbox" })
-    tb.text = "Rhythmbox"
-    tb:buttons(awful.util.table.join(
-    awful.button({ }, 1, function () notify() end),
-    awful.button({ }, 3, function ()
-        os.execute("mpc toggle >/dev/null")
-        tb.text = music_current_short()
-    end)
-    ))
-
-    local timer = timer { timeout = 2 }
-    timer:add_signal("timeout", function() tb.text = music_current_short() end)
-    timer:start()
-
-    tb.text = music_current_short()
-    return tb
-end
-
 function url_decode(str)
   str = string.gsub (str, "+", " ")
   str = string.gsub (str, "%%(%x%x)",
@@ -125,3 +106,23 @@ function url_decode(str)
   str = string.gsub (str, "\r\n", "\n")
   return str
 end
+
+function mpc.init()
+    tb = wibox.widget.textbox("loading")
+    tb:buttons(awful.util.table.join(
+    awful.button({ }, 1, function () notify() end),
+    awful.button({ }, 3, function ()
+        os.execute("mpc toggle >/dev/null")
+        tb:set_text(music_current_short())
+    end)
+    ))
+
+    local timer = timer { timeout = 2 }
+    timer:connect_signal("timeout", function() tb:set_text(music_current_short()) end)
+    timer:start()
+
+    tb:set_text(music_current_short())
+    return tb
+end
+
+return mpc
