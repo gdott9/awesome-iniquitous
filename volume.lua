@@ -1,10 +1,10 @@
-local awful = awful
-local beautiful = beautiful
-local widget = widget
+local awful = require("awful")
+local wibox = require("wibox")
+local beautiful = require("beautiful")
+
 local timer = timer
 local string = string
 local tonumber = tonumber
-local image = image
 local os    = {
     getenv = os.getenv,
     execute = os.execute
@@ -16,11 +16,10 @@ local io = {
 local table = {
     insert  = table.insert
 }
-module("iniquitous.volume")
+local volume_widget = {}
 
-local img = widget({ type = "imagebox" })
-local tb = widget({ type = "textbox" })
-tb.text = "N/A%"
+local img = nil
+local tb = nil
 
 local initialized = false
 
@@ -37,7 +36,10 @@ local value = nil
 
 local vol = 0
 
-function init(a_mode, a_channel)
+function volume_widget.init(a_mode, a_channel)
+    img = wibox.widget.imagebox()
+    tb = wibox.widget.textbox("N/A%")
+
     mode = a_mode
     channel = a_channel
 
@@ -59,23 +61,23 @@ function init(a_mode, a_channel)
 
         initialized = true
     end
-    volume(display)
+    volume_widget.volume(display)
 
     local but = awful.util.table.join(
-    awful.button({ }, 3, function () volume("mute") end),
-    awful.button({ }, 4, function () volume("up") end),
-    awful.button({ }, 5, function () volume("down") end)
+    awful.button({ }, 3, function () volume_widget.volume("mute") end),
+    awful.button({ }, 4, function () volume_widget.volume("up") end),
+    awful.button({ }, 5, function () volume_widget.volume("down") end)
     )
     tb:buttons(but)
     img:buttons(but)
 
     local timer = timer { timeout = 7 }
-    timer:add_signal("timeout", function() volume("display") end)
+    timer:connect_signal("timeout", function() volume_widget.volume("display") end)
     timer:start()
 end
 
 
-function volume(mode)
+function volume_widget.volume(mode)
     if mode == "up" then
         os.execute(up .. " >/dev/null")
     elseif mode == "down" then
@@ -113,13 +115,15 @@ function display(volume)
     else
         vol_lvl = "high"
     end
-    img.image = image(beautiful["vol_" .. vol_lvl])
-    tb.text = volume .."%"
+    img:set_image(beautiful["vol_" .. vol_lvl])
+    tb:set_text(volume .."%")
 end
 
-function textbox()
+function volume_widget.textbox()
     return tb
 end
-function imagebox()
+function volume_widget.imagebox()
     return img
 end
+
+return volume_widget
