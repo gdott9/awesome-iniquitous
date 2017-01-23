@@ -2,7 +2,8 @@ local awful = require("awful")
 local naughty = require("naughty")
 local wibox = require("wibox")
 
-local timer = timer
+local timer = require("gears.timer")
+
 local string = string
 local os    = {
     getenv = os.getenv,
@@ -118,9 +119,9 @@ function mpc.init()
     end)
     ))
 
-    local timer = timer { timeout = 2 }
-    timer:connect_signal("timeout", function() tb:set_text(music_current_short()) end)
-    timer:start()
+    local tm = timer { timeout = 2, }
+    tm:connect_signal("timeout", function() tb:set_text(music_current_short()) end)
+    tm:start()
 
     tb:set_text(music_current_short())
     return tb

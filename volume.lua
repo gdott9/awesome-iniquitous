@@ -2,7 +2,8 @@ local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 
-local timer = timer
+local timer = require("gears.timer")
+
 local string = string
 local tonumber = tonumber
 local os    = {
@@ -72,9 +73,9 @@ function volume_widget.init(a_mode, a_channel)
     tb:buttons(but)
     img:buttons(but)
 
-    local timer = timer { timeout = 7 }
-    timer:connect_signal("timeout", function() volume_widget.volume("display") end)
-    timer:start()
+    local tm = timer { timeout = 7, }
+    tm:connect_signal("timeout", function() volume_widget.volume("display") end)
+    tm:start()
 end
 
 
