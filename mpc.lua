@@ -10,7 +10,8 @@ local os    = {
 }
 local io = {
     open  = io.open,
-    close  = io.close
+    close  = io.close,
+    popen = io.popen
 }
 local table = {
     insert  = table.insert
@@ -20,7 +21,7 @@ local tonumber = tonumber
 local mpc = {}
 
 function music_current_short()
-    local music = awful.util.pread('mpc -f "[%artist%]##[%track%]##[%title%]##[%time%]##" | head -2 | sed "s/^\\[\\(playing\\|paused\\)\\] \\+#[0-9]\\+\\/[0-9]\\+ \\+\\([0-9]\\+:[0-9]\\+\\)\\/.*$/\\1#\\2#/" | tr -d "\\n"')
+    local music = io.popen('mpc -f "[%artist%]##[%track%]##[%title%]##[%time%]##" | head -2 | sed "s/^\\[\\(playing\\|paused\\)\\] \\+#[0-9]\\+\\/[0-9]\\+ \\+\\([0-9]\\+:[0-9]\\+\\)\\/.*$/\\1#\\2#/" | tr -d "\\n"'):read("*a")
     --print(music)
 
     local len_max = 20
@@ -43,7 +44,7 @@ function music_current_short()
     return awful.util.escape(res)
 end
 function music_current_full()
-    local music = awful.util.pread("mpc -f  \"[%artist%]\\n%album%\\n%track% - %title%\\n## %time%\" | head -4");
+    local music = io.popen("mpc -f  \"[%artist%]\\n%album%\\n%track% - %title%\\n## %time%\" | head -4"):read("*a")
 
     if(string.len(music) == 0) then
         music = "Mpd Daemon is not runnig"
@@ -55,12 +56,12 @@ function music_current_full()
 end
 function music_cover()
     local cover = os.getenv("HOME") .. "/.album/default.png"
-    local music = awful.util.pread("mpc -f \"%artist%-%album%\"")
+    local music = io.popen("mpc -f \"%artist%-%album%\""):read("*a")
     --local dir = awful.util.pread("qdbus org.gnome.Rhythmbox /org/gnome/Rhythmbox/Player \"org.gnome.Rhythmbox.Player.getPlayingUri\"")
     --local dir_format = url_decode(dir:sub(8, dir:find("\/[^\/]+$")))
     --print(dir_format)
 
-    local dir = "/home/gdott9/Music/" .. awful.util.pread("dirname \"`mpc -f '%file%' | head -1`\"")
+    local dir = "/home/gdott9/Music/" .. io.popen("dirname \"`mpc -f '%file%' | head -1`\""):read("*a")
 
     if(string.len(music) > 0) then
         music = string.gsub(string.sub(music, 1, string.len(music)-1), "[/?%*:|\"<>]", "_")
