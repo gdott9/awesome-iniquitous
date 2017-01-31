@@ -50,7 +50,7 @@ function volume_widget.init(a_mode, a_channel)
         down = "ossmix " .. channel .. " -- -2"
         mute = "ossmix " .. channel .. " 0"
         unmute = "ossmix " .. channel .. " "
-        value = function() return io.popen("ossmix " .. channel):match("(%d+)"):read() end
+        value = function() return io.popen("ossmix " .. channel):read("*a"):match("(%d+)") end
 
         initialized = true
     elseif mode == "alsa" then
@@ -59,7 +59,7 @@ function volume_widget.init(a_mode, a_channel)
         mute = "amixer sset " .. channel .. " 0"
         unmute = "amixer sset " .. channel .. " "
         unmute2 = "%"
-        value = function() return io.popen("amixer get " .. channel):read():match("(%d+)%%") end
+        value = function() return io.popen("amixer get " .. channel):read("*a"):match("(%d+)%%") end
 
         initialized = true
     end
